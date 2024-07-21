@@ -94,14 +94,25 @@ class Intervenant(db.Model):
     phone = db.Column(db.String(100), nullable=False)
     desc = db.Column(db.String(100), nullable=False)
 
-    def is_role(self, group : str) -> bool:
-        _group = Role.query.filter_by(name=group).first()
-        group_id = _group.id
-        roles = Intervenant_Role.query.filter_by(intervenant_id=self.id).all()
-        for role in roles:
-            if role.role_id == group_id:
-                return True
-        return False
+    def is_role(self, group : str|list[str]) -> bool:
+        if isinstance(group, str):
+            _group = Role.query.filter_by(name=group).first()
+            group_id = _group.id
+            roles = Intervenant_Role.query.filter_by(intervenant_id=self.id).all()
+            for role in roles:
+                if role.role_id == group_id:
+                    return True
+            return False
+        elif isinstance(group, list):
+            group_id = []
+            for g in group:
+                _group = Role.query.filter_by(name=g).first()
+                group_id.append(_group.id)
+            roles = Intervenant_Role.query.filter_by(intervenant_id=self.id).all()
+            for role in roles:
+                if role.role_id in group_id:
+                    return True
+            return False
         
     
     def __repr__(self):
@@ -260,7 +271,7 @@ def group_required(groups : list):
             if 'user_id' not in session:
                 flash('You need to be logged in to access this page', 'danger')
                 return redirect(url_for('login'))
-            if session['user_id'].group not in groups:
+            if Intervenant.query.filter(Intervenant.id == session['user_id']).first().is_role(groups):
                 flash('You do not have the right to access this page', 'danger')
                 return redirect(url_for('index'))
             return f(*args, **kwargs)
