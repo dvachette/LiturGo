@@ -9,7 +9,7 @@
 # Importing the necessary libraries
 
 # Flask is used to manage web pages
-from flask import Flask, request, session, redirect, url_for, render_template, flash
+from flask import Flask, request, session, redirect, url_for, render_template, flash, abort
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -31,6 +31,8 @@ import subprocess
 # Logging is used to log messages
 import logging
 
+# ==== Constants ==== #
+DEBUG = True
 
 # Creating the Flask app
 app = Flask(__name__)
@@ -55,7 +57,7 @@ class pages:
     pass
 
 # "Paroisse" class
-class Paroisse(db.model):
+class Paroisse(db.Model):
     """
     Paroisse class
 
@@ -70,7 +72,7 @@ class Paroisse(db.model):
         return f"<Paroisse {self.name}>"
 
 # "Intervenant" class
-class Intervenant(db.model):
+class Intervenant(db.Model):
     """
     Intervenant class
 
@@ -92,13 +94,22 @@ class Intervenant(db.model):
     phone = db.Column(db.String(100), nullable=False)
     desc = db.Column(db.String(100), nullable=False)
 
+    def is_role(self, group : str) -> bool:
+        _group = Role.query.filter_by(name=group).first()
+        group_id = _group.id
+        roles = Intervenant_Role.query.filter_by(intervenant_id=self.id).all()
+        for role in roles:
+            if role.role_id == group_id:
+                return True
+        return False
+        
     
     def __repr__(self):
         return f"<Intervenant {self.name}>"
 
 
 # "Eglise" class
-class Eglise(db.model):
+class Eglise(db.Model):
     """
     Eglise class
 
@@ -113,13 +124,14 @@ class Eglise(db.model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     address = db.Column(db.String(100), nullable=False)
+    paroisse_id = db.Column(db.Integer, db.ForeignKey('paroisse.id'), nullable=False)
     paroisse = db.relationship('Paroisse', backref=db.backref('eglises', lazy=True))
     
     def __repr__(self):
         return f"<Eglise {self.name}>"
     
 # "Type" class
-class Type(db.model):
+class Type(db.Model):
     """
     Type class
 
@@ -135,7 +147,7 @@ class Type(db.model):
         return f"<Type {self.name}>"
 
 # "Required" class
-class Required(db.model):
+class Required(db.Model):
     """
     Required class
     
@@ -146,7 +158,9 @@ class Required(db.model):
     level : int : the level of the required role : 0 is absent, 1 is optional and 2 is required
     """
     id = db.Column(db.Integer, primary_key=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('type.id'), nullable=False)
     type = db.relationship('Type', backref=db.backref('required', lazy=True))
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
     role = db.relationship('Role', backref=db.backref('required', lazy=True))
     level = db.Column(db.Integer, nullable=False) 
 
@@ -155,7 +169,7 @@ class Required(db.model):
         return f"<Required {self.name}>"
     
 # "Role" class
-class Role(db.model):
+class Role(db.Model):
     """
     Role class
 
@@ -170,7 +184,7 @@ class Role(db.model):
         return f"<Role {self.name}>"
 
 # "Celebration" class
-class Celebration(db.model):
+class Celebration(db.Model):
     """
     Celebration class
 
@@ -182,15 +196,15 @@ class Celebration(db.model):
     """
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
+    eglise_id = db.Column(db.Integer, db.ForeignKey('eglise.id'), nullable=False)
     eglise = db.relationship('Eglise', backref=db.backref('celebrations', lazy=True))
+    type_id = db.Column(db.Integer, db.ForeignKey('type.id'), nullable=False)
     type = db.relationship('Type', backref=db.backref('celebrations', lazy=True))
-    intervenants = db.relationship('Intervenant', secondary='intervenant_celebration', backref=db.backref('celebrations', lazy=True))
-    
     def __repr__(self):
         return f"<Celebration {self.date}>"
     
 # "Intervenant_Celebration" class
-class Intervenant_Celebration(db.model):
+class Intervenant_Celebration(db.Model):
     """
     Intervenant_Celebration class
 
@@ -200,19 +214,40 @@ class Intervenant_Celebration(db.model):
     celebration : Celebration : the celebration
     """
     id = db.Column(db.Integer, primary_key=True)
+    id_intervenant = db.Column(db.Integer, db.ForeignKey('intervenant.id'), nullable=False)
     intervenant = db.relationship('Intervenant', backref=db.backref('intervenant_celebrations', lazy=True))
+    id_celebration = db.Column(db.Integer, db.ForeignKey('celebration.id'), nullable=False)
     celebration = db.relationship('Celebration', backref=db.backref('intervenant_celebrations', lazy=True))
 
     
     def __repr__(self):
         return f"<Intervenant_Celebration {self.intervenant.id} {self.celebration.id}>"
+
+class Intervenant_Role(db.Model):
+    """
+    Intervenant_Role class
+
+    Attributes:
+    id : int : the id of the intervenant_role relation
+    intervenant : Intervenant : the intervenant
+    role : Role : the role
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    intervenant_id = db.Column(db.Integer, db.ForeignKey('intervenant.id'), nullable=False)
+    intervenant = db.relationship('Intervenant', backref=db.backref('intervenant_roles', lazy=True))
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
+    role = db.relationship('Role', backref=db.backref('intervenant_roles', lazy=True))
+
     
+    def __repr__(self):
+        return f"<Intervenant_Role {self.intervenant.id} {self.role.id}>"
+
 # ==== Decorators ==== #
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user' not in session:
+        if 'user_id' not in session:
             flash('You need to be logged in to access this page', 'danger')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
@@ -222,10 +257,10 @@ def group_required(groups : list):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if 'user' not in session:
+            if 'user_id' not in session:
                 flash('You need to be logged in to access this page', 'danger')
                 return redirect(url_for('login'))
-            if session['user'].group not in groups:
+            if session['user_id'].group not in groups:
                 flash('You do not have the right to access this page', 'danger')
                 return redirect(url_for('index'))
             return f(*args, **kwargs)
@@ -240,3 +275,33 @@ def group_required(groups : list):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+# Login route
+# This route is used to login the user.
+# It is accessible by everyone.
+# It displays the login page.
+@app.route('/login', methods=['POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = Intervenant.query.filter_by(email=email).first()
+        if user:
+            if check_password_hash(user.password, password):
+                session['user_id'] = user.id
+                flash('You are now logged in', 'success')
+                return redirect(url_for('index'))
+            else:
+                flash('Invalid password', 'danger')
+                return redirect(url_for('index'))
+        else:
+            flash('User not found', 'danger')
+            return redirect(url_for('index'))
+    else:
+        abort(405)
+
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=DEBUG)

@@ -1,0 +1,14 @@
+{% extends "main.html"%}
+{% block title %} Accueil {% endblock %}
+{% block content %}
+    <h1>Bienvenue sur LiturGo !</h1>
+    <div id="login-form">
+        <form action="{{ url_for('login') }}" method="post">
+            <input type="text" name="email" id="email" placeholder="Adresse Email : mail@example.com" required>
+            <input type="password" name="password" id="password" placeholder="Mot de passe" required>
+            <button type="submit"> Se connecter </button>
+        </form>
+
+    </div>
+
+{% endblock %}

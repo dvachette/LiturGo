@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>LiturGo - {% block title %} Accueil {% endblock %}</title>
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        {% block content %}
+        {% endblock %}
+        <footer>
+            <p>Donatien VACHETTE - 2024</p>
+            <p>All rights reserved</p>
+            <p><a href="{{ url_for('index') }}">home</a></p>
+        </footer>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-{{messages[-1][0]}}" id="popup">
+                    <span id="closepopup" onclick="closePopup()">X</span>
+                    <p>{{ messages[-1][1] }}</p>
+                </div>
+            {% endif %}
+        {% endwith %}
+        <script>
+            function closePopup() {
+                document.getElementById("popup").style.display = "none"
+            }
+        </script>
+    </body>
+</html>
