@@ -1,14 +1,12 @@
 {% extends "main.html"%}
-{% block style %}static/css/index.css{% endblock %}
+{% block style %}home-admin.css{% endblock %}
 {% block title %}Accueil{% endblock %}
 {% block content %}
     <h1 id="main-title">Bienvenue sur LiturGo !</h1>
-        <ul>
-            <li>
-                <a href="">
-                    <img src="/static/imgs/new-place.png" alt="Ajouter une paroisse" title="Ajouter une paroisse"/>
-                </a>
-            </li>
-        </ul>
+        <div id="action">
+            <a href="" id="add-paroisse">
+                <img class="action-button" src="/static/imgs/new-place.png" alt="Ajouter une paroisse">
+            </a>
+        </div>
     </div>
 {% endblock %}

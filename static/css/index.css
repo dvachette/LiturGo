@@ -1,6 +1,7 @@
 :root{
     --forms-bg-color: #0d1477;
     --main-text-color: #9f9f9f;
+    --light-text-color: #b9b9b9;
 
 }
 h1#main-title{
@@ -9,7 +10,7 @@ h1#main-title{
     text-align: center;
 }
 h2{
-    color: var(--main-text-color);
+    color: var(--light-text-color);
     font-size: 1.5rem;
     text-align: center;
 }
@@ -24,4 +25,21 @@ form#login-form{
     width:30%;
     margin: 0 auto;
 
+}
+form input{
+    margin: 10px 0;
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    border: none;
+}
+form button{
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    border: none;
+    background-color: #ffffff;
+    color: var(--forms-bg-color);
+    font-weight: bold;
+    cursor: pointer;
 }

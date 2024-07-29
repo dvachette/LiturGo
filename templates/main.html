@@ -23,6 +23,12 @@
             {% endif %}
         {% endwith %}
         <script>
+            document.addEventListener('click', function(event) {
+                var popup = document.getElementById('popup');
+                if (popup && !popup.contains(event.target)) {
+                    closePopup();
+                }
+            });
             function closePopup() {
                 document.getElementById("popup").style.display = "none"
             }
