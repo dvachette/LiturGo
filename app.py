@@ -2,7 +2,8 @@
 
 # Created by : Donatien VACHETTE
 
-# Description : This file is the main file of the project. It contains the main code of the project.
+# Description : This file is the main file of the project.
+# It contains the main code of the project.
 
 # Importing the necessary libraries
 
@@ -401,9 +402,9 @@ def page(route: str, user: Intervenant):
 
 # ==== Routes ==== #
 # Index route
-# This route is the main route of the project. It displays the main page of the project.
-# It is accessible by everyone.
+# This route is the main route of the project.
 # It displays the main page of the project.
+# It is accessible by everyone.
 @app.route('/')
 def index():
     return render_template('index.html')
