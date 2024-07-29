@@ -2,8 +2,9 @@
 <html lang="fr">
     <head>
         <meta charset="UTF-8">
-        <title>LiturGo - {% block title %} Accueil {% endblock %}</title>
-        <link rel="stylesheet" href="css/main.css">
+        <title>LiturGo - {% block title %}Accueil{% endblock %}</title>
+        <link rel="stylesheet" href="static/css/main.css">
+        <link rel="stylesheet" href="static/css/{% block style %}main.css{% endblock %}">
     </head>
     <body>
         {% block content %}
@@ -16,7 +17,7 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="flash-{{messages[-1][0]}}" id="popup">
-                    <span id="closepopup" onclick="closePopup()">X</span>
+                    <span id="closepopup" onclick="closePopup()">&#10060;</span>
                     <p>{{ messages[-1][1] }}</p>
                 </div>
             {% endif %}

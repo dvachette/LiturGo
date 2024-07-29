@@ -1,0 +1,3 @@
+2024-07-29 11:05:31,140 - app - INFO - user 0 logged in
+2024-07-29 11:05:49,020 - app - WARNING - user 0 tried to log in with a wrong password
+2024-07-29 11:05:57,282 - app - WARNING - user with email sdc not found

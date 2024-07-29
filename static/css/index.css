@@ -1,0 +1,27 @@
+:root{
+    --forms-bg-color: #0d1477;
+    --main-text-color: #9f9f9f;
+
+}
+h1#main-title{
+    color: var(--main-text-color);
+    font-size: 2.5rem;
+    text-align: center;
+}
+h2{
+    color: var(--main-text-color);
+    font-size: 1.5rem;
+    text-align: center;
+}
+form#login-form{
+    background-color: var(--forms-bg-color);
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.244);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width:30%;
+    margin: 0 auto;
+
+}
