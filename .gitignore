@@ -62,7 +62,6 @@ cover/
 *.pot
 
 # Flask stuff:
-instance/
 .webassets-cache
 
 # Scrapy stuff:
